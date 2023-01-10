@@ -109,28 +109,32 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  setTimer0(10);
+  setTimer0(1000);
   while (1)
   {
     /* USER CODE END WHILE */
-//	  second++;
-//	  if(second >= 60) {
-//		  second = 0;
-//		  minute++;
-//	  }
-//	  if(minute >= 60) {
-//		  minute = 0;
-//		  hour++;
-//	  }
-//	  if(hour >= 24) {
-//		  hour = 0;
-//	  }
-//	  updateClockBuffer();
-//	  HAL_Delay(1000);
 	  if(timer0_flag == 1) {
-	 		  HAL_GPIO_TogglePin(RLED_PORT, RLED1);
-	 		  setTimer0(2000);
-	 	  }
+		  timer0_flag = 0;
+		  setTimer0(1000);
+
+		  HAL_GPIO_TogglePin(DOT_PORT, DOT);
+		  HAL_GPIO_TogglePin(RLED_PORT, RLED1);
+
+		  second++;
+		  if(second >= 60) {
+			  second = 0;
+			  minute++;
+		  }
+		  if(minute >= 60) {
+			  minute = 0;
+			  hour++;
+		  }
+		  if(hour >= 24) {
+			  hour = 0;
+		  }
+		  updateClockBuffer();
+	  }
+
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
@@ -259,8 +263,6 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE BEGIN 4 */
 void display7SEG(int num) {
-
-
 	HAL_GPIO_WritePin(SEG_PORT, SEG0 | SEG1 | SEG2 | SEG3 | SEG4 | SEG5 | SEG6, 1);
 		switch(num) {
 		case 0:
