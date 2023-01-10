@@ -1,16 +1,17 @@
 <?xml version='1.0' encoding='UTF-8' standalone='yes'?>
 <WORKSPACE>
  <FRAME activewindow="0">
-  <PLACEMENT>2c0000000200000003000000ffffffffffffffffffffffffffffffff130100001a0000007b07000038040000</PLACEMENT>
+  <PLACEMENT>2c0000000200000003000000ffffffffffffffffffffffffffffffff0300000001000000010600005f030000</PLACEMENT>
   <WINDOW type="default" module="ISIS"/>
  </FRAME>
  <MODULE name="VSMDEBUG">
   <PWI>
    <POPUP w="800" x="38" flags="00000002" y="125" h="200" pid="0" iid="-1">
     <PROPERTIES>
-     <ITEM name="Message Column Width">671</ITEM>
+     <ITEM name="Message Column Width">550</ITEM>
      <ITEM name="ShowGrid">No</ITEM>
      <ITEM name="Source Column Width">100</ITEM>
+     <ITEM name="Time Column Width">120</ITEM>
      <ITEM name="Version">100</ITEM>
     </PROPERTIES>
    </POPUP>
@@ -331,7 +332,7 @@
      <ITEM name="TopLineAddress">E000E000</ITEM>
     </PROPERTIES>
    </POPUP>
-   <POPUP w="600" x="678" flags="0000002b" y="680" h="400" pid="100" iid="1">
+   <POPUP w="600" x="678" flags="0000002a" y="680" h="400" pid="100" iid="1">
     <PROPERTIES>
      <ITEM name="CaseSensitive">No</ITEM>
      <ITEM name="DISPADDRS">Yes</ITEM>
@@ -342,7 +343,7 @@
      <ITEM name="nBreakpoints">0</ITEM>
     </PROPERTIES>
    </POPUP>
-   <POPUP w="300" x="698" flags="0000000b" y="780" h="300" pid="101" iid="1">
+   <POPUP w="300" x="698" flags="0000000a" y="780" h="300" pid="101" iid="1">
     <PROPERTIES>
      <ITEM name="Address Column Width">96</ITEM>
      <ITEM name="AutoResize">No</ITEM>

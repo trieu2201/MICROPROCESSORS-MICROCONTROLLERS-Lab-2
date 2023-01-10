@@ -49,11 +49,22 @@ int led_buffer [4] = {0, 0, 0, 0};
 
 int hour = 15, minute = 8, second = 50;
 
+const int MAX_LED_MATRIX = 8;
+int index_led_matrix = 0;
+uint8_t matrix_buffer[8] = {0x01, 0x06, 0x38, 0xC8, 0xC8, 0x38, 0x06, 0x01};
+uint16_t row_pin[8] = {ROW0,ROW1,ROW2,ROW3,ROW4,ROW5,ROW6,ROW7};
+uint16_t col_pin[8] = {ENM0,ENM1,ENM2,ENM3,ENM4,ENM5,ENM6,ENM7};
+
+
 int TIMER_CYCLE = 10;
 int timer0_counter = 0;
 int timer0_flag = 0;
+
 int timer1_counter = 0;
 int timer1_flag = 0;
+
+int timer2_counter = 0;
+int timer2_flag = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -64,8 +75,11 @@ static void MX_GPIO_Init(void);
 void update7SEG(int);
 void updateClockBuffer(void);
 void display7SEG(int);
+void updateLEDMatrix(int);
+
 void setTimer0(int);
 void setTimer1(int);
+void setTimer2(int);
 void timer_run(void);
 /* USER CODE END PFP */
 
@@ -111,38 +125,53 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   setTimer0(10);
   setTimer1(10);
+  setTimer2(10);
+
+  HAL_GPIO_WritePin(ROW_PORT, ROW0|ROW1|ROW2|ROW3|ROW4|ROW5|ROW6|ROW7, 1);
+  HAL_GPIO_WritePin(ENM_PORT, ENM0|ENM1|ENM2|ENM3|ENM4|ENM5|ENM6|ENM7, 1);
+
+  HAL_GPIO_WritePin(ROW_PORT, ROW7, 0);
+  HAL_GPIO_WritePin(ENM_PORT, ENM7, 0);
   while (1)
   {
     /* USER CODE END WHILE */
-	  if(timer0_flag) {
-		  timer0_flag = 0;
-		  setTimer0(1000);
 
-		  HAL_GPIO_TogglePin(DOT_PORT, DOT);
-		  HAL_GPIO_TogglePin(RLED_PORT, RLED1);
-
-		  second++;
-		  if(second >= 60) {
-			  second = 0;
-			  minute++;
-		  }
-		  if(minute >= 60) {
-			  minute = 0;
-			  hour++;
-		  }
-		  if(hour >= 24) {
-			  hour = 0;
-		  }
-		  updateClockBuffer();
-	  }
-	  if(timer1_flag) {
-		  timer1_flag = 0;
-		  setTimer1(250);
-
-		  update7SEG(index_led++);
-		  if(index_led == MAX_LED) index_led = 0;
-	  }
     /* USER CODE BEGIN 3 */
+	  if(timer0_flag) {
+	  		  timer0_flag = 0;
+	  		  setTimer0(1000);
+
+	  		  HAL_GPIO_TogglePin(DOT_PORT, DOT);
+	  		  HAL_GPIO_TogglePin(RLED_PORT, RLED1);
+
+	  		  second++;
+	  		  if(second >= 60) {
+	  			  second = 0;
+	  			  minute++;
+	  		  }
+	  		  if(minute >= 60) {
+	  			  minute = 0;
+	  			  hour++;
+	  		  }
+	  		  if(hour >= 24) {
+	  			  hour = 0;
+	  		  }
+	  		  updateClockBuffer();
+	  	  }
+	  	  if(timer1_flag) {
+	  		  timer1_flag = 0;
+	  		  setTimer1(250);
+
+	  		  update7SEG(index_led++);
+	  		  if(index_led == MAX_LED) index_led = 0;
+	  	  }
+	  	  if(timer2_flag) {
+	  		  timer2_flag = 0;
+	  		  setTimer2(10);
+
+	  		  updateLEDMatrix(index_led_matrix++);
+	  		  if(index_led_matrix == MAX_LED_MATRIX) index_led_matrix = 0;
+	  	  }
   }
   /* USER CODE END 3 */
 }
@@ -241,26 +270,38 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_7
-                          |GPIO_PIN_8|GPIO_PIN_9, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_2|GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_5
+                          |GPIO_PIN_6|GPIO_PIN_7|GPIO_PIN_8|GPIO_PIN_9
+                          |GPIO_PIN_10|GPIO_PIN_11|GPIO_PIN_12|GPIO_PIN_13
+                          |GPIO_PIN_14|GPIO_PIN_15, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3
-                          |GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_10
+                          |GPIO_PIN_11|GPIO_PIN_12|GPIO_PIN_13|GPIO_PIN_14
+                          |GPIO_PIN_15|GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_5
+                          |GPIO_PIN_6|GPIO_PIN_8|GPIO_PIN_9, GPIO_PIN_RESET);
 
-  /*Configure GPIO pins : PA4 PA5 PA6 PA7
-                           PA8 PA9 */
-  GPIO_InitStruct.Pin = GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_7
-                          |GPIO_PIN_8|GPIO_PIN_9;
+  /*Configure GPIO pins : PA2 PA3 PA4 PA5
+                           PA6 PA7 PA8 PA9
+                           PA10 PA11 PA12 PA13
+                           PA14 PA15 */
+  GPIO_InitStruct.Pin = GPIO_PIN_2|GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_5
+                          |GPIO_PIN_6|GPIO_PIN_7|GPIO_PIN_8|GPIO_PIN_9
+                          |GPIO_PIN_10|GPIO_PIN_11|GPIO_PIN_12|GPIO_PIN_13
+                          |GPIO_PIN_14|GPIO_PIN_15;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : PB0 PB1 PB2 PB3
-                           PB4 PB5 PB6 */
-  GPIO_InitStruct.Pin = GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3
-                          |GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6;
+  /*Configure GPIO pins : PB0 PB1 PB2 PB10
+                           PB11 PB12 PB13 PB14
+                           PB15 PB3 PB4 PB5
+                           PB6 PB8 PB9 */
+  GPIO_InitStruct.Pin = GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_10
+                          |GPIO_PIN_11|GPIO_PIN_12|GPIO_PIN_13|GPIO_PIN_14
+                          |GPIO_PIN_15|GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_5
+                          |GPIO_PIN_6|GPIO_PIN_8|GPIO_PIN_9;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
@@ -327,6 +368,19 @@ void update7SEG(int index) {
 	}
 }
 
+void updateLEDMatrix(int index) {
+	HAL_GPIO_WritePin(ROW_PORT, ROW0|ROW1|ROW2|ROW3|ROW4|ROW5|ROW6|ROW7, 1);
+	HAL_GPIO_WritePin(ENM_PORT, ENM0|ENM1|ENM2|ENM3|ENM4|ENM5|ENM6|ENM7, 1);
+
+	for(int i = 0; i < 8; i++) {
+		if(matrix_buffer[index] & (0x80 >> i)) {
+			HAL_GPIO_WritePin(ROW_PORT, row_pin[i], 0);
+		}
+	}
+
+	HAL_GPIO_WritePin(ENM_PORT, col_pin[index], 0);
+}
+
 void updateClockBuffer() {
 	led_buffer[0] = hour / 10;
 	led_buffer[1] = hour % 10;
@@ -338,10 +392,13 @@ void setTimer0(int duration) {
 	timer0_counter = duration / TIMER_CYCLE;
 	timer0_flag = 0;
 }
-
 void setTimer1(int duration) {
 	timer1_counter = duration / TIMER_CYCLE;
 	timer1_flag = 0;
+}
+void setTimer2(int duration) {
+	timer2_counter = duration / TIMER_CYCLE;
+	timer2_flag = 0;
 }
 
 void timer_run() {
@@ -351,10 +408,18 @@ void timer_run() {
 			timer0_flag = 1;
 		}
 	}
+
 	if(timer1_counter > 0) {
 		timer1_counter--;
 		if(timer1_counter == 0) {
 			timer1_flag = 1;
+		}
+	}
+
+	if(timer2_counter > 0) {
+		timer2_counter--;
+		if(timer2_counter == 0) {
+			timer2_flag = 1;
 		}
 	}
 }
